@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://neondb_owner:npg_BGtlZIJP93eU@ep-lingering-brook-a7bplb4o-pooler.ap-southeast-2.aws.neon.tech/neondb?sslmode=require"
+}
+
+
+
+model User {
+  id               Int       @id @default(autoincrement())
+  first_name       String    @db.VarChar(50)
+  last_name        String    @db.VarChar(50)
+  email            String    @unique @db.VarChar(50)
+  password         String    @db.VarChar(50)
+  avatar           String?
+  created_at       DateTime
+  receivedBookings Booking[] @relation("ReceivedBookings")
+  availbility Availability[] @relation("UserAvailability")
+  balance Int @default(0)
+  hourly_rate Int @default(0)
+}
+
+model Booking {
+  id           Int      @id @default(autoincrement())
+  created_at   DateTime
+  scheduled_at DateTime
+  meet_url     String?
+  from_user_name    String @db.VarChar(50)
+  to_user      String
+  request_user_email String @db.VarChar(60)
+  to   User @relation("ReceivedBookings", fields: [to_user], references: [email])
+  expired Boolean
+}
+
+model Availability {
+  id         Int        @id @default(autoincrement())
+  user_email String
+  user       User       @relation("UserAvailability", fields: [user_email], references: [email])
+  timeSlots  TimeSlot[] // one-to-many relation
+}
+
+model TimeSlot {
+  id             Int          @id @default(autoincrement())
+  availabilityId Int
+  day            Weekday      // enum
+  start_time     String       // store as '09:00' or use DateTime if needed
+  end_time       String
+
+  availability   Availability @relation(fields: [availabilityId], references: [id])
+}
+
+enum Weekday {
+  MONDAY 
+  TUESDAY 
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
