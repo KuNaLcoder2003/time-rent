@@ -40,6 +40,10 @@ model Booking {
   request_user_email String @db.VarChar(60)
   to   User @relation("ReceivedBookings", fields: [to_user], references: [email])
   expired Boolean
+  date DateTime
+  timeSlotId Int @unique
+  timeSlot TimeSlot @relation(fields: [timeSlotId] , references: [id])
+
 }
 
 model Availability {
@@ -55,6 +59,7 @@ model TimeSlot {
   day            Weekday      // enum
   start_time     String       // store as '09:00' or use DateTime if needed
   end_time       String
+  booking Booking?
 
   availability   Availability @relation(fields: [availabilityId], references: [id])
 }
