@@ -2,8 +2,8 @@
 import axios from 'axios';
 
 const getZoomToken = async (code : string) => {
-  const clientId = "";
-  const clientSecret = ""
+  const clientId = `${process.env.ZOOM_MEETING_CLIENT_ID}`;
+  const clientSecret = `${process.env.ZOOM_MEETING_CLIENT_SECRET}`
   const redirectUri =  "http://localhost:3000/oauth/callback"
 
    const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');

@@ -3,8 +3,13 @@ import { PrismaClient } from "../../generated/prisma"
 
 import Stripe from "stripe"
 import authMiddleware from "../middlewares/authMiddleWare"
+import dotenv from "dotenv"
 
-const stripe = new Stripe("")
+dotenv.config()
+
+const stripe_api_secret = process.env.STRIPE_SECRET
+
+const stripe = new Stripe(`${stripe_api_secret}`)
 
 
 
