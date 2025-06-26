@@ -4,7 +4,7 @@ import { PrismaClient } from "../../generated/prisma"
 import Stripe from "stripe"
 import authMiddleware from "../middlewares/authMiddleWare"
 
-const stripe = new Stripe("sk_test_51RcKdXR48JIxDpQaIGl3mm7LyKXOtR3mdGzPnNnhUgFKQCi08Zh0zaXGHuUG2hkgV0nszPtvhjbd4QdZ0CQq891900RdQRg8ap")
+const stripe = new Stripe("")
 
 
 
