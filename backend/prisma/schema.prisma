@@ -43,6 +43,7 @@ model Booking {
   date DateTime
   timeSlotId Int @unique
   timeSlot TimeSlot @relation(fields: [timeSlotId] , references: [id])
+  payment Boolean
 
 }
 
