@@ -48,6 +48,7 @@ const Dashboard = () => {
             upcomingBookings : data.recvd_bookings ,
             completedBookings : []
           })
+          localStorage.setItem('user_email' , data.user.email)
         }
       })
     } catch (error) {
@@ -56,7 +57,7 @@ const Dashboard = () => {
   }  , [])
 
 
-const bookingUrl = `https://timerent.com/book/${userDetails.name.toLowerCase().replace(' ', '')}`;
+const bookingUrl = `http://localhost:5173/book/${userDetails.email}`;
 
 const mockBookings: Booking[] = [
   {

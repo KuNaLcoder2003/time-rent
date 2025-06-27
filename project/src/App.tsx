@@ -12,6 +12,7 @@ import SignIn from './components/Signin';
 import Dashboard from './components/Dashboard';
 import SetAvailability from './components/SetAvailabilty';
 import BookingPage from './components/BookingPage';
+import Success from './components/Success';
 
 function App() {
   const [isLoggedIn , setIsLoggedIn] = useState(false);
@@ -30,7 +31,9 @@ function App() {
       <Route path='/signin' element = {isLoggedIn ? <Dashboard/> :<SignIn setIsLoggedIn={setIsLoggedIn} /> } />
       <Route path='/dashboard' element={isLoggedIn ? <Dashboard/> : <SignIn setIsLoggedIn={setIsLoggedIn}/>} />
       <Route path='/dashboard/availabililty' element={isLoggedIn ? <SetAvailability/> : <SignIn setIsLoggedIn={setIsLoggedIn}/>} />
-      <Route path='/bookSlot' element={<BookingPage/>} />
+      <Route path='/book/:email' element={<BookingPage/>} />
+      <Route path='/success' element={<Success/>} />
+      <Route path='/cancel' element={<div>Payment failed</div>} />
     </Routes>
   )
 }

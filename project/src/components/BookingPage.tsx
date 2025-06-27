@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast';
-import { ArrowLeft, Calendar, Clock, Key } from 'lucide-react';
-import { data } from 'react-router-dom';
+import { ArrowLeft, Calendar, Clock, Flag, Key } from 'lucide-react';
+import { data, useLoaderData, useLocation } from 'react-router-dom';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe, Stripe } from '@stripe/stripe-js';
+const stripe_promise = Promise.resolve(); // replace by loadStripe('YOUR_PUBLISHABLE_KEY)
+const stripe = await stripe_promise;
 
 interface TimeSlots {
     id: number,
@@ -10,7 +14,6 @@ interface TimeSlots {
     start_time: string,
     end_time: string
 }
-
 const Days = [
     'SUNDAY',
     'MONDAY',
@@ -20,6 +23,7 @@ const Days = [
     'FRIDAY',
     'SATURDAY',
 ]
+
 const months = [
     'January',
     'February',
@@ -49,17 +53,14 @@ const no_of_days: { [Key: string]: number } = {
     'November': 30,
     'December': 31,
 }
-
 interface weeklyDates {
     date: string,
     day: string,
     month: string,
 }
 
-
-
-
 const BookingPage = () => {
+    const path = useLocation()    
     const [userData, setUserData] = useState({
         name: '',
         title: 'Math Tutor & Academic Coach',
@@ -73,15 +74,17 @@ const BookingPage = () => {
     const [weeklyDates, setWeeklyDates] = useState<weeklyDates[]>([])
     const [selectedDate, setSelectedDate] = useState<weeklyDates>()
     const [availableTimeSlots, SetAvailableTimeSolts] = useState<TimeSlots[]>([])
-
-
+    const [selectedSlot, setSelectedSlot] = useState<TimeSlots>()
+    const [email, setEmail] = useState<string>("")
+    const [payment, setPayment] = useState<boolean>(false)
     useEffect(() => {
         try {
             setLoading(true)
             fetch('http://localhost:3000/api/v1/booking/details', {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    email: path.pathname.split('/')[2]
                 }
             }).then(async (resonse: Response) => {
                 const data = await resonse.json()
@@ -187,19 +190,48 @@ const BookingPage = () => {
 
         SetAvailableTimeSolts(filtered)
 
-
     }
 
+    async function handleBookingSlot() {
+        let sessionId: any;
+        try {
+            fetch('http://localhost:3000/api/v1/booking/create-payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    amount: 45,
+                    timeSlots: { ...selectedSlot, day: selectedDate?.date, date: selectedDate?.day },
+                    email: email,
+                    user_email: path.pathname.split('/')[2]
+                })
+            }).then(async (response: Response) => {
+                const data = await response.json()
+                sessionId = data.sessionId
+                localStorage.setItem('booking', String(data.bookingId))
+                const stripe_checkout = await stripe?.redirectToCheckout({
+                    sessionId: sessionId,
+                })
+                if (stripe_checkout?.error) {
+                    toast.error(`${stripe_checkout?.error}`)
+                }
+
+            })
+
+        } catch (error) {
+
+        }
+
+    }
     return (
         <>
             {
                 loading ? <div>Loading...</div> : (
                     <div className='min-h-screen bg-gray-50'>
-
                         <nav className="bg-white/95 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
                             <div className="container mx-auto px-4 lg:px-8">
                                 <div className="flex justify-between items-center h-16">
-                                    {/* Logo */}
                                     <div className="flex items-center space-x-2">
                                         <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-green-400 rounded-lg flex items-center justify-center">
                                             <Clock className="w-5 h-5 text-white" />
@@ -208,8 +240,6 @@ const BookingPage = () => {
                                             TimeRent
                                         </span>
                                     </div>
-
-                                    {/* Back to Home */}
                                     <button className="flex items-center text-gray-600 hover:text-blue-600 transition-colors">
                                         <ArrowLeft className="w-5 h-5 mr-2" />
                                         <span className="hidden sm:inline">Back to Home</span>
@@ -217,20 +247,14 @@ const BookingPage = () => {
                                 </div>
                             </div>
                         </nav>
-
                         <div className='max-w-4xl m-auto mt-[4rem] h-auto p-4 rounded-lg shadow-lg'>
                             <div className='w-[100%] flex justify-start gap-10'>
-
                                 <div className='max-w-[80px] h-[80px]'>
                                     <img className='min-w-[80px] h-[80px] rounded-full object-cover scale-[1.1]' src={userData.avatar} />
                                 </div>
-
                                 <div className='flex flex-col items-baseline gap-2'>
-
                                     <h1 className='text-3xl font-bold'>Book a session with {userData.name}</h1>
-
                                     <p className='text-xl text-blue-500 font-semibold'>{userData.title}</p>
-
                                     <div className="flex items-center justify-center md:justify-start gap-2">
                                         <div className="flex items-center">
                                             <span className="text-yellow-400">★</span>
@@ -239,17 +263,12 @@ const BookingPage = () => {
                                         <div className="text-gray-500">•</div>
                                         <div className="text-gray-700 font-medium">${userData.hourlyRate}/hour</div>
                                     </div>
-
                                     <div className='text-gray-600 leading-relaxed'>
                                         {userData.description}
                                     </div>
-
                                 </div>
-
                             </div>
                         </div>
-
-
                         <div className='max-w-4xl m-auto mt-[4rem] h-auto rounded-lg shadow-lg p-8 flex flex-col gap-2'>
                             <h2 className='text-2xl font-bold text-gray-900 mb-6 text-center'>Select an available time slot</h2>
                             <div className='p-4 w-[90%] rounded-lg m-auto'>
@@ -259,15 +278,13 @@ const BookingPage = () => {
                                         {
                                             timeSlots.map((obj: TimeSlots, index) => {
                                                 return (
-                                                    <p className='bg-blue-300 p-1 rounded-lg text-blue-800 font-semibold' key={index}>{obj.day}: {obj.start_time} - {obj.end_time} </p>
+                                                    <p className='bg-blue-300 p-1 rounded-lg text-blue-800 font-semibold' key={`${obj.day}_${index}`}>{obj.day}: {obj.start_time} - {obj.end_time} </p>
                                                 )
                                             })
                                         }
                                     </div>
                                 </div>
-
                                 <div className='mt-8'>
-
                                     <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                                         <Calendar className="w-5 h-5 mr-2 text-blue-600" />
                                         Choose a Date
@@ -281,17 +298,15 @@ const BookingPage = () => {
                                             })
                                         }
                                     </div>
-
                                     <div className='mt-8'>
                                         {
                                             availableTimeSlots.length > 0 ? <>
                                                 <h3>Availabe time slots for {selectedDate?.date}<sup>th</sup>{selectedDate?.month}</h3>
                                                 <div className='flex items-center gap-6 p-2'>
-
                                                     {
                                                         availableTimeSlots.map((obj: TimeSlots, index) => {
                                                             return (
-                                                                <div className='flex flex-col items-start bg-blue-100 p-4 px-8 rounded-lg cursor-pointer'>
+                                                                <div key={index} onClick={() => { setSelectedSlot(obj) }} className='flex flex-col items-start bg-blue-100 p-4 px-8 rounded-lg cursor-pointer'>
                                                                     <p className='text-blue-700 font-semibold'>Start Time : {obj.start_time}</p>
                                                                     <p className='text-blue-500 font-lg'>Duration : 1 hrs</p>
                                                                     <p className='text-blue-500 font-lg'>Price : ${userData.hourlyRate}/hour</p>
@@ -302,17 +317,12 @@ const BookingPage = () => {
                                                 </div>
                                             </> : (null)
                                         }
-
                                     </div>
                                 </div>
                             </div>
-
-                            <button className='self-center text-center mt-4 p-4 w-[30%] rounded-lg bg-gradient-to-r from-blue-500 to-green-400 text-white font-bold text-lg'>Book slot</button>
-
+                            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder='Enter your email...' className='w-[90%] m-auto p-2  rounded-lg shadow-md shadow-green-100' />
+                            <button onClick={() => handleBookingSlot()} disabled={selectedSlot ? false : true} className='self-center text-center mt-4 p-4 w-[30%] rounded-lg bg-gradient-to-r from-blue-500 to-green-400 text-white font-bold text-lg'>Book slot</button>
                         </div>
-
-                        
-
                     </div>
                 )
             }
