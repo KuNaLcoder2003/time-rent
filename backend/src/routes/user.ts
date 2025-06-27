@@ -1,6 +1,7 @@
 import express from "express"
 import { PrismaClient ,Weekday } from "../../generated/prisma"
 import { generateToken } from "../functions/generateToken"
+import authMiddleware from "../middlewares/authMiddleWare"
 const prisma = new PrismaClient()
 
 const user_router = express.Router()
@@ -117,8 +118,8 @@ user_router.post('/signin', async (req: express.Request, res: express.Response) 
     }
 })
 
-user_router.get('/details', async (req: express.Request, res: express.Response) => {
-    const email = "kunalindia59@gmail.com"
+user_router.get('/details', authMiddleware , async (req: any, res: express.Response) => {
+    const email = req.email as string
     try {
         const user = await prisma.user.findFirst({
             where: { email: email }
