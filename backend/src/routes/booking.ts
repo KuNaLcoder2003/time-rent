@@ -214,7 +214,8 @@ booking_router.post('/make-booking/:email/:id', async (req: express.Request, res
         const updated_booking = await prisma.booking.update({
             where: { id: Number(id) },
             data: {
-                payment: true
+                payment: true,
+                meet_url : response.join_url
             }
         })
         if (!updated_booking) {

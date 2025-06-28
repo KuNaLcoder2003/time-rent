@@ -152,8 +152,9 @@ user_router.get('/details', authMiddleware , async (req: any, res: express.Respo
     }
 })
 
-user_router.post('/setAvailability', async (req: express.Request, res: express.Response) => {
+user_router.post('/setAvailability/:email', async (req: express.Request, res: express.Response) => {
     const availabilityObj: AvailabilityInput = req.body.availability
+    const email = req.params.email
     try {
         for (const [day, value] of Object.entries(availabilityObj)) {
             if (!value.enabled) continue;
@@ -163,7 +164,7 @@ user_router.post('/setAvailability', async (req: express.Request, res: express.R
             const dayEnum = Weekday[upperDay];
             const availability = await prisma.availability.create({
                 data: {
-                    user_email: "kunalindia59@gmail.com"
+                    user_email: email
                 },
             });
             if(!availability) {
