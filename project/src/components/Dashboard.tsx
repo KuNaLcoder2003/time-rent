@@ -58,7 +58,7 @@ const Dashboard = () => {
             bookingUrl : `http://localhost:5173/book/${data.user.email}`
           })
           
-          localStorage.setItem('user_email', data.user.email)
+          
         }
       })
     } catch (error) {
