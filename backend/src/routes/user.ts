@@ -2,6 +2,8 @@ import express from "express"
 import { PrismaClient ,Weekday } from "../../generated/prisma"
 import { generateToken } from "../functions/generateToken"
 import authMiddleware from "../middlewares/authMiddleWare"
+import bcrypt from "bcrypt"
+const salt = 10;
 const prisma = new PrismaClient()
 
 const user_router = express.Router()
@@ -39,10 +41,6 @@ type AvailabilityInput = {
     | 'sunday']?: DayAvailability;
 };
 
-
-
-
-
 user_router.post('/signup', async (req: express.Request, res: express.Response) => {
     const user_details: New_User = req.body.details
     try {
@@ -61,13 +59,15 @@ user_router.post('/signup', async (req: express.Request, res: express.Response) 
             })
             return
         }
+        const hashed_email = bcrypt.hashSync(user_details.email , salt)
         const new_user = await prisma.user.create({
             data: {
                 first_name: user_details.first_name,
                 last_name: user_details.last_name,
                 email: user_details.email,
                 password: user_details.password,
-                created_at: new Date()
+                created_at: new Date(),
+                hashed_email : hashed_email
             }
         })
         if (!new_user) {
@@ -117,7 +117,6 @@ user_router.post('/signin', async (req: express.Request, res: express.Response) 
         })
     }
 })
-
 user_router.get('/details', authMiddleware , async (req: any, res: express.Response) => {
     const email = req.email as string
     try {
@@ -134,9 +133,9 @@ user_router.get('/details', authMiddleware , async (req: any, res: express.Respo
         const recvd_bookings = await prisma.booking.findMany({
             where: { to_user: email },  // can be empty -> if empty then show no current bookings (so no if checks)
         })
-
         res.status(200).json({
-            user,
+            user ,
+          
             recvd_bookings,
 
         })
@@ -167,7 +166,6 @@ user_router.post('/setAvailability', async (req: express.Request, res: express.R
                 })
                 return
             }
-
             // Step 2: Create associated time slots
             const timeSlotsData = value.timeSlots.map(slot => ({
                 availabilityId: availability.id,
@@ -175,7 +173,6 @@ user_router.post('/setAvailability', async (req: express.Request, res: express.R
                 start_time: slot.start,
                 end_time: slot.end,
             }));
-
             const result = await prisma.timeSlot.createMany({
                 data: timeSlotsData
             });
