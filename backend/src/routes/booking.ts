@@ -6,6 +6,7 @@ import authMiddleware from "../middlewares/authMiddleWare"
 import dotenv from "dotenv"
 const base = require('base-64');
 import bcrypt from "bcrypt"
+import router from "."
 
 
 dotenv.config()
@@ -59,6 +60,7 @@ interface zoomResponse {
 
 }
 const generateZoomMeeting = async (invitees: invitee[] , email : string , name : string) => {
+    let res;
     try {
         const zoomAccessToken = await generateZoomAccessToken();
 
@@ -127,11 +129,12 @@ const generateZoomMeeting = async (invitees: invitee[] , email : string , name :
 
 
         console.log("generateZoomMeeting JsonResponse --> ", jsonResponse);
-        return jsonResponse
+        res = jsonResponse
     } catch (error) {
         console.log("generateZoomMeeting Error --> ", error);
         throw error;
     }
+    return res
 };
 
 booking_router.post('/create-payment/:email', async (req: express.Request, res: express.Response) => {
@@ -147,23 +150,6 @@ booking_router.post('/create-payment/:email', async (req: express.Request, res: 
             })
             return
         }
-        const session = await stripe.checkout.sessions.create({
-            mode: "payment",
-            success_url: "http://localhost:5173/success/" + user.email,
-            cancel_url: "http://localhost:5173/cancel",
-            line_items: [
-                {
-                    price_data: {
-                        currency: "usd",
-                        product_data: {
-                            name: 'TimeSlot booking for ' + `${timeSlots?.day} ${timeSlots.date}`
-                        },
-                        unit_amount: amount * 100
-                    },
-                    quantity: 1
-                }
-            ]
-        })
         const new_booking = await prisma.booking.create({
             data: {
                 from_user_name: 'Lappu',
@@ -178,6 +164,24 @@ booking_router.post('/create-payment/:email', async (req: express.Request, res: 
                 payment: false
             }
         })
+        const session = await stripe.checkout.sessions.create({
+            mode: "payment",
+            success_url: "http://localhost:5173/success/" + user.email + '/' + new_booking.id ,
+            cancel_url: "http://localhost:5173/cancel",
+            line_items: [
+                {
+                    price_data: {
+                        currency: "usd",
+                        product_data: {
+                            name: 'TimeSlot booking for ' + `${timeSlots?.day} ${timeSlots.date}`
+                        },
+                        unit_amount: amount * 100
+                    },
+                    quantity: 1
+                }
+            ]
+        })
+        
         res.status(200).json({
             sessionId: session.id,
             bookingId: new_booking.id
@@ -190,9 +194,10 @@ booking_router.post('/create-payment/:email', async (req: express.Request, res: 
     }
 })
 
-booking_router.post('/make-booking/:email', async (req: express.Request, res: express.Response) => {
-    const { bookingId, request_email } = req.body;
+booking_router.post('/make-booking/:email/:id', async (req: express.Request, res: express.Response) => {
+    const {  request_email } = req.body;
     const email = req.params.email as string
+    const id = req.params.id;
     try {
         const user = await prisma.user.findFirst({
             where: { email : email }
@@ -205,9 +210,9 @@ booking_router.post('/make-booking/:email', async (req: express.Request, res: ex
                 return
             }
         }
-        const response = generateZoomMeeting([user.email, request_email] ,user.email , `${user.first_name} ${user.last_name}` )
+        const response = await generateZoomMeeting([user.email, request_email] ,user.email , `${user.first_name} ${user.last_name}` )
         const updated_booking = await prisma.booking.update({
-            where: { id: bookingId },
+            where: { id: Number(id) },
             data: {
                 payment: true
             }
@@ -276,4 +281,5 @@ booking_router.get('/details/:email', async (req: express.Request, res: express.
         })
     }
 })
+
 export default booking_router;

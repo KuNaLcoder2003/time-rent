@@ -3,6 +3,11 @@ import { PrismaClient ,Weekday } from "../../generated/prisma"
 import { generateToken } from "../functions/generateToken"
 import authMiddleware from "../middlewares/authMiddleWare"
 import bcrypt from "bcrypt"
+import crypto from "crypto"
+
+
+
+
 const salt = 10;
 const prisma = new PrismaClient()
 
@@ -59,6 +64,7 @@ user_router.post('/signup', async (req: express.Request, res: express.Response) 
             })
             return
         }
+        crypto
         const hashed_email = bcrypt.hashSync(user_details.email , salt)
         const new_user = await prisma.user.create({
             data: {
