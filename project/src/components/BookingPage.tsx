@@ -4,7 +4,7 @@ import { ArrowLeft, Calendar, Clock, Flag, Key } from 'lucide-react';
 import { data, useLoaderData, useLocation } from 'react-router-dom';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
-const stripe_promise = Promise.resolve(); // replace by loadStripe('YOUR_PUBLISHABLE_KEY)
+const stripe_promise = loadStripe('')
 const stripe = await stripe_promise;
 
 interface TimeSlots {
@@ -80,11 +80,10 @@ const BookingPage = () => {
     useEffect(() => {
         try {
             setLoading(true)
-            fetch('http://localhost:3000/api/v1/booking/details', {
+            fetch('http://localhost:3000/api/v1/booking/details/' + path.pathname.split('/')[2] , {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    email: path.pathname.split('/')[2]
                 }
             }).then(async (resonse: Response) => {
                 const data = await resonse.json()
@@ -195,7 +194,7 @@ const BookingPage = () => {
     async function handleBookingSlot() {
         let sessionId: any;
         try {
-            fetch('http://localhost:3000/api/v1/booking/create-payment', {
+            fetch('http://localhost:3000/api/v1/booking/create-payment/' + path.pathname.split('/')[2], {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

@@ -32,7 +32,7 @@ function App() {
       <Route path='/dashboard' element={isLoggedIn ? <Dashboard/> : <SignIn setIsLoggedIn={setIsLoggedIn}/>} />
       <Route path='/dashboard/availabililty' element={isLoggedIn ? <SetAvailability/> : <SignIn setIsLoggedIn={setIsLoggedIn}/>} />
       <Route path='/book/:email' element={<BookingPage/>} />
-      <Route path='/success' element={<Success/>} />
+      <Route path='/success/:email' element={<Success/>} />
       <Route path='/cancel' element={<div>Payment failed</div>} />
     </Routes>
   )
