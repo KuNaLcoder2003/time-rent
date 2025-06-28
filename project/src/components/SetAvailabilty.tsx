@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Clock, Calendar, CheckCircle, Save } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
 interface TimeSlot {
   start: string;
@@ -72,6 +73,8 @@ const SetAvailability = () => {
     }));
   };
 
+  const path = useLocation()
+
   const removeTimeSlot = (dayKey: string, slotIndex: number) => {
     setAvailability(prev => ({
       ...prev,
@@ -85,7 +88,7 @@ const SetAvailability = () => {
   const handleSave = () => {
     console.log(availability)
     // Handle save logic here
-    fetch('http://localhost:3000/api/v1/user/setAvailability' , {
+    fetch('http://localhost:3000/api/v1/user/setAvailability/' + path.pathname.split('/')[3] , {
       method : 'POST' , 
       headers : {
         'Content-Type' : 'application/json'

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Clock, Calendar, User, Copy, CheckCircle, LogOut, Bell, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface Booking {
   id: string;
@@ -97,6 +98,7 @@ const Dashboard = () => {
       rate: 45
     }
   ];
+  const navigate = useNavigate()
 
   const handleCopyLink = async () => {
     try {
@@ -131,7 +133,7 @@ const Dashboard = () => {
 
             {/* Navigation Links */}
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#" className="text-blue-600 font-medium">Dashboard</a>
+              <p onClick={()=>navigate(`/dashboard/availability/${userDetails.email}`)} className="text-blue-600 font-medium">Set Availability</p>
               <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors">Bookings</a>
               <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors">Profile</a>
               <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors">Earnings</a>
