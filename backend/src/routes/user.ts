@@ -76,7 +76,7 @@ user_router.post('/signup', async (req: express.Request, res: express.Response) 
                 hashed_email : hashed_email
             }
         })
-        console.log(new_user)
+        
         if (!new_user) {
             res.status(403).json({
                 message: 'Unable to register at the moment'
@@ -97,6 +97,7 @@ user_router.post('/signup', async (req: express.Request, res: express.Response) 
 
 user_router.post('/signin', async (req: express.Request, res: express.Response) => {
     const user_cred: Cred = req.body.cred
+    console.log(user_cred)
     try {
         if (!user_cred.email || !user_cred.password) {
             res.status(400).json({
@@ -125,7 +126,8 @@ user_router.post('/signin', async (req: express.Request, res: express.Response) 
     }
 })
 user_router.get('/details', authMiddleware , async (req: any, res: express.Response) => {
-    const email = req.email as string
+    const email = req.user_email as string
+    console.log(email);
     try {
         const user = await prisma.user.findFirst({
             where: { email: email }
@@ -137,6 +139,7 @@ user_router.get('/details', authMiddleware , async (req: any, res: express.Respo
             })
             return
         }
+        console.log(user);
         const recvd_bookings = await prisma.booking.findMany({
             where: { to_user: email },  // can be empty -> if empty then show no current bookings (so no if checks)
         })
