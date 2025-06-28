@@ -4,8 +4,9 @@ import { ArrowLeft, Calendar, Clock, Flag, Key } from 'lucide-react';
 import { data, useLoaderData, useLocation } from 'react-router-dom';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
-const stripe_promise = loadStripe('')
-const stripe = await stripe_promise;
+import dotenv from "dotenv"
+
+
 
 interface TimeSlots {
     id: number,
@@ -60,7 +61,7 @@ interface weeklyDates {
 }
 
 const BookingPage = () => {
-    const path = useLocation()    
+    const path = useLocation()
     const [userData, setUserData] = useState({
         name: '',
         title: 'Math Tutor & Academic Coach',
@@ -80,7 +81,7 @@ const BookingPage = () => {
     useEffect(() => {
         try {
             setLoading(true)
-            fetch('http://localhost:3000/api/v1/booking/details/' + path.pathname.split('/')[2] , {
+            fetch('http://localhost:3000/api/v1/booking/details/' + path.pathname.split('/')[2], {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -192,7 +193,10 @@ const BookingPage = () => {
     }
 
     async function handleBookingSlot() {
+        const stripe_promise = await loadStripe(`${import.meta.env.STRIPE_KEY}`)
+        const stripe = stripe_promise;
         let sessionId: any;
+
         try {
             fetch('http://localhost:3000/api/v1/booking/create-payment/' + path.pathname.split('/')[2], {
                 method: 'POST',
