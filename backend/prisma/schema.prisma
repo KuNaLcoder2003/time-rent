@@ -28,6 +28,7 @@ model User {
   availbility Availability[] @relation("UserAvailability")
   balance Int @default(0)
   hourly_rate Int @default(0)
+  hashed_email String @default("")
 }
 
 model Booking {
