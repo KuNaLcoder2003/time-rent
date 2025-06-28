@@ -249,7 +249,7 @@ booking_router.get('/details/:email', async (req: express.Request, res: express.
             return
         }
         const available = await prisma.availability.findMany({
-            where: { user_email: "kunalindia59@gmail.com" }
+            where: { user_email: email }
         })
         if (available.length == 0) {
             res.status(402).json({
