@@ -76,6 +76,7 @@ user_router.post('/signup', async (req: express.Request, res: express.Response) 
                 hashed_email : hashed_email
             }
         })
+        console.log(new_user)
         if (!new_user) {
             res.status(403).json({
                 message: 'Unable to register at the moment'
