@@ -133,7 +133,7 @@ const Dashboard = () => {
 
             {/* Navigation Links */}
             <div className="hidden md:flex items-center space-x-8">
-              <p onClick={()=>navigate(`/dashboard/availability/${userDetails.email}`)} className="text-blue-600 font-medium">Set Availability</p>
+              <p onClick={()=>navigate(`/dashboard/availabililty/${userDetails.email}`)} className="text-blue-600 font-medium">Set Availability</p>
               <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors">Bookings</a>
               <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors">Profile</a>
               <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors">Earnings</a>
