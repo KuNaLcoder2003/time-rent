@@ -65,7 +65,9 @@ user_router.post('/signup', async (req: express.Request, res: express.Response) 
             return
         }
         crypto
-        const hashed_email = bcrypt.hashSync(user_details.email , salt)
+        const hash = crypto.createHash('sha256')
+        hash.update(user_details.email)
+        const digest = hash.digest("hex")
         const new_user = await prisma.user.create({
             data: {
                 first_name: user_details.first_name,
@@ -73,7 +75,7 @@ user_router.post('/signup', async (req: express.Request, res: express.Response) 
                 email: user_details.email,
                 password: user_details.password,
                 created_at: new Date(),
-                hashed_email : hashed_email
+                hashed_email : digest
             }
         })
         

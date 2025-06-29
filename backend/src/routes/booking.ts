@@ -5,8 +5,6 @@ import Stripe from "stripe"
 import authMiddleware from "../middlewares/authMiddleWare"
 import dotenv from "dotenv"
 const base = require('base-64');
-import bcrypt from "bcrypt"
-import router from "."
 
 
 dotenv.config()
@@ -142,7 +140,7 @@ booking_router.post('/create-payment/:email', async (req: express.Request, res: 
     const hashed = req.params.email
     try {
         const user = await prisma.user.findFirst({
-            where: { email: hashed }
+            where: { hashed_email: hashed }
         })
         if (!user) {
             res.status(404).json({
@@ -166,7 +164,7 @@ booking_router.post('/create-payment/:email', async (req: express.Request, res: 
         })
         const session = await stripe.checkout.sessions.create({
             mode: "payment",
-            success_url: "http://localhost:5173/success/" + user.email + '/' + new_booking.id ,
+            success_url: "http://localhost:5173/success/" + user.hashed_email + '/' + new_booking.id ,
             cancel_url: "http://localhost:5173/cancel",
             line_items: [
                 {
@@ -200,7 +198,7 @@ booking_router.post('/make-booking/:email/:id', async (req: express.Request, res
     const id = req.params.id;
     try {
         const user = await prisma.user.findFirst({
-            where: { email : email }
+            where: { hashed_email : email }
         })
         if (!user) {
             if (!user) {
@@ -209,6 +207,16 @@ booking_router.post('/make-booking/:email/:id', async (req: express.Request, res
                 })
                 return
             }
+        }
+        const booking = await prisma.booking.findFirst({
+            where : {id : Number(id) , payment : true} 
+        })
+        if(booking) {
+            res.json({
+                message : 'Booking already exists',
+                booking 
+            })
+            return
         }
         const response = await generateZoomMeeting([user.email, request_email] ,user.email , `${user.first_name} ${user.last_name}` )
         const updated_booking = await prisma.booking.update({
@@ -240,7 +248,7 @@ booking_router.get('/details/:email', async (req: express.Request, res: express.
     const email = req.params.email
     try {
         const user = await prisma.user.findFirst({
-            where: { email: email }
+            where: { hashed_email: email }
         })
         if (!user) {
             res.status(404).json({
@@ -249,7 +257,7 @@ booking_router.get('/details/:email', async (req: express.Request, res: express.
             return
         }
         const available = await prisma.availability.findMany({
-            where: { user_email: email }
+            where: { user_email: user.email }
         })
         if (available.length == 0) {
             res.status(402).json({
