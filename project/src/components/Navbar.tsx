@@ -98,8 +98,8 @@ const Navbar = () => {
               >
                 Testimonials
               </button>
-              <button className="w-full mt-4 bg-gradient-to-r from-blue-600 to-green-500 text-white px-6 py-2 rounded-full hover:from-blue-700 hover:to-green-600 transition-all">
-                Get Started
+              <button onClick={()=>navigate('/signin')} className="w-full mt-4 bg-gradient-to-r from-blue-600 to-green-500 text-white px-6 py-2 rounded-full hover:from-blue-700 hover:to-green-600 transition-all">
+                Login
               </button>
             </div>
           </div>
