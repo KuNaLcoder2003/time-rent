@@ -38,7 +38,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     try {
-      fetch('http://localhost:3000/api/v1/user/details', {
+      fetch('https://time-rent-production.up.railway.app/details', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ const Dashboard = () => {
             upcomingBookings: data.recvd_bookings,
             completedBookings: [],
             hashed_email: data.user.hashed_email,
-            bookingUrl : `http://localhost:5173/book/${data.user.hashed_email}`
+            bookingUrl : `https://time-rent-production.up.railway.app/book/${data.user.hashed_email}`
           })
           
           
