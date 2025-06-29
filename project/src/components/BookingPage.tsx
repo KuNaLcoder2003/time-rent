@@ -80,7 +80,7 @@ const BookingPage = () => {
     useEffect(() => {
         try {
             setLoading(true)
-            fetch('https://time-rent-production.up.railway.app/api/v1/booking/details/' + path.pathname.split('/')[2], {
+            fetch('http://localhost:3000/api/v1/booking/details/' + path.pathname.split('/')[2], {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -197,7 +197,7 @@ const BookingPage = () => {
         let sessionId: any;
 
         try {
-            fetch('https://time-rent-production.up.railway.app/api/v1/booking/create-payment/' + path.pathname.split('/')[2], {
+            fetch('http://localhost:3000/api/v1/booking/create-payment/' + path.pathname.split('/')[2], {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
