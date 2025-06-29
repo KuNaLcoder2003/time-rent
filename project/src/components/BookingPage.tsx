@@ -4,7 +4,6 @@ import { ArrowLeft, Calendar, Clock, Flag, Key } from 'lucide-react';
 import { data, useLoaderData, useLocation } from 'react-router-dom';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
-import dotenv from "dotenv"
 
 
 
@@ -193,7 +192,7 @@ const BookingPage = () => {
     }
 
     async function handleBookingSlot() {
-        const stripe_promise = await loadStripe(`${import.meta.env.STRIPE_KEY}`)
+        const stripe_promise = await loadStripe(`${import.meta.env.STRIPE_SECRET}`)
         const stripe = stripe_promise;
         let sessionId: any;
 
@@ -212,12 +211,14 @@ const BookingPage = () => {
             }).then(async (response: Response) => {
                 const data = await response.json()
                 sessionId = data.sessionId
+                console.log(sessionId)
                 localStorage.setItem('booking', String(data.bookingId))
                 const stripe_checkout = await stripe?.redirectToCheckout({
                     sessionId: sessionId,
                 })
                 if (stripe_checkout?.error) {
                     toast.error(`${stripe_checkout?.error}`)
+                    console.log(stripe_checkout.error)
                 }
 
             })

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Clock, Calendar, CheckCircle, Save } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
 
 interface TimeSlot {
   start: string;
@@ -17,6 +18,7 @@ interface WeeklyAvailability {
 }
 
 const SetAvailability = () => {
+  const navigate = useNavigate()
   const [availabilityType, setAvailabilityType] = useState<'weekly' | 'onetime'>('weekly');
   const [showSuccess, setShowSuccess] = useState(false);
   
@@ -99,6 +101,10 @@ const SetAvailability = () => {
     }).then(async(response : Response)=>{
       const data = await response.json()
       console.log(data)
+      if(data.valid) {
+        toast.success(data.message)
+        navigate('/dashboard')
+      }
     })
   };
 
@@ -106,6 +112,7 @@ const SetAvailability = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
+      <Toaster/>
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           {/* Header */}

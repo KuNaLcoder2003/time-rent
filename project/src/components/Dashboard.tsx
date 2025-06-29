@@ -55,7 +55,7 @@ const Dashboard = () => {
             upcomingBookings: data.recvd_bookings,
             completedBookings: [],
             hashed_email: data.user.hashed_email,
-            bookingUrl : `http://localhost:5173/book/${data.user.email}`
+            bookingUrl : `http://localhost:5173/book/${data.user.hashed_email}`
           })
           
           
