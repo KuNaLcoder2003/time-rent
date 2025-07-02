@@ -192,7 +192,7 @@ const BookingPage = () => {
     }
 
     async function handleBookingSlot() {
-        const stripe_promise = await loadStripe(`${import.meta.env.STRIPE_SECRET}`)
+        const stripe_promise = await loadStripe("")
         const stripe = stripe_promise;
         let sessionId: any;
 
