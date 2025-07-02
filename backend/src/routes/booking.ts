@@ -11,7 +11,7 @@ dotenv.config()
 
 const stripe_api_secret = process.env.STRIPE_SECRET
 
-const stripe = new Stripe(`${stripe_api_secret}`)
+const stripe = new Stripe("sk_test_51RcKdXR48JIxDpQaIGl3mm7LyKXOtR3mdGzPnNnhUgFKQCi08Zh0zaXGHuUG2hkgV0nszPtvhjbd4QdZ0CQq891900RdQRg8ap")
 const zoomAccountId = `${process.env.ZOOM_ACCOUNT_ID}`
 const zoomClientId = `${process.env.ZOOM_CLIENT_ID}`
 const zoomClientSecret = `${process.env.ZOOM_CLIENT_SECRET}`
@@ -57,7 +57,7 @@ interface zoomResponse {
     password: string,
 
 }
-const generateZoomMeeting = async (invitees: invitee[] , email : string , name : string) => {
+const generateZoomMeeting = async (invitees: invitee[], email: string, name: string) => {
     let res;
     try {
         const zoomAccessToken = await generateZoomAccessToken();
@@ -92,7 +92,7 @@ const generateZoomMeeting = async (invitees: invitee[] , email : string , name :
                             ],
                         },
                         calendar_type: 1,
-                        contact_email:email ,
+                        contact_email: email,
                         contact_name: name,
                         email_notification: true,
                         encryption_type: "enhanced_encryption",
@@ -164,7 +164,7 @@ booking_router.post('/create-payment/:email', async (req: express.Request, res: 
         })
         const session = await stripe.checkout.sessions.create({
             mode: "payment",
-            success_url: "http://localhost:5173/success/" + user.hashed_email + '/' + new_booking.id ,
+            success_url: "http://localhost:5173/success/" + user.hashed_email + '/' + new_booking.id,
             cancel_url: "http://localhost:5173/cancel",
             line_items: [
                 {
@@ -179,7 +179,7 @@ booking_router.post('/create-payment/:email', async (req: express.Request, res: 
                 }
             ]
         })
-        
+
         res.status(200).json({
             sessionId: session.id,
             bookingId: new_booking.id
@@ -193,12 +193,12 @@ booking_router.post('/create-payment/:email', async (req: express.Request, res: 
 })
 
 booking_router.post('/make-booking/:email/:id', async (req: express.Request, res: express.Response) => {
-    const {  request_email } = req.body;
+    const { request_email } = req.body;
     const email = req.params.email as string
     const id = req.params.id;
     try {
         const user = await prisma.user.findFirst({
-            where: { hashed_email : email }
+            where: { hashed_email: email }
         })
         if (!user) {
             if (!user) {
@@ -209,21 +209,21 @@ booking_router.post('/make-booking/:email/:id', async (req: express.Request, res
             }
         }
         const booking = await prisma.booking.findFirst({
-            where : {id : Number(id) , payment : true} 
+            where: { id: Number(id), payment: true }
         })
-        if(booking) {
+        if (booking) {
             res.json({
-                message : 'Booking already exists',
-                booking 
+                message: 'Booking already exists',
+                booking
             })
             return
         }
-        const response = await generateZoomMeeting([user.email, request_email] ,user.email , `${user.first_name} ${user.last_name}` )
+        const response = await generateZoomMeeting([user.email, request_email], user.email, `${user.first_name} ${user.last_name}`)
         const updated_booking = await prisma.booking.update({
             where: { id: Number(id) },
             data: {
                 payment: true,
-                meet_url : response.join_url
+                meet_url: response.join_url
             }
         })
         if (!updated_booking) {
@@ -268,6 +268,16 @@ booking_router.get('/details/:email', async (req: express.Request, res: express.
         const availability_ids = available.map((obj) => {
             return obj.id
         })
+
+        const bookings = await prisma.booking.findMany({
+            where: {
+                to_user: user.email,
+                payment: true
+            }
+        })
+        const time_slots_ids = bookings.map((obj) => {
+            return obj.timeSlotId
+        })
         const time_slots = await prisma.timeSlot.findMany({
             where: {
                 availabilityId: {
@@ -275,6 +285,8 @@ booking_router.get('/details/:email', async (req: express.Request, res: express.
                 }
             }
         });
+        const available_time_slots = time_slots.filter((obj , index) => obj.id !== time_slots_ids[index])
+        console.log(available_time_slots)
         if (time_slots.length === 0) {
             res.status(400).json({ message: 'No time slots found for available dates' });
             return
