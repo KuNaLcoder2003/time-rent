@@ -46,7 +46,7 @@ const Success = () => {
     const email = path.pathname.split('/')[2]
     setLoading(true);
 
-    fetch('https://time-rent-production.up.railway.app/' + email + '/' + id, {
+    fetch('http://localhost:3000/api/v1/booking/make-booking/' + email + '/' + id, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
